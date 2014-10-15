@@ -298,11 +298,6 @@ function Game(debugMode, startLevel) {
             this._levelReached = 999; // make all levels accessible
             __commands = Object.keys(this.reference); // display all help
             this.sound.toggleSound(); // mute sound by default in debug mode
-        } else {
-            // some people are at work right now
-            if (document.referrer.indexOf('news.ycombinator.com') > -1) {
-                this.toggleSound();
-            }
         }
 
         // Lights, camera, action
@@ -599,7 +594,7 @@ function CodeEditor(textAreaDomID, width, height, game) {
 
     var charLimit = 80;
 
-    var properties = {}
+    var properties = {};
     var editableLines = [];
     var editableSections = {};
     var lastChange = {};
@@ -1074,7 +1069,7 @@ function CodeEditor(textAreaDomID, width, height, game) {
     this.initialize(); // run initialization code
 }
 ROT.Display.create = function(game, opts) {
-    opts['fontFamily'] = '"droid sans mono", Courier, "Courier New", monospace';
+    opts.fontFamily = '"droid sans mono", Courier, "Courier New", monospace';
     var display = new ROT.Display(opts);
     display.game = game;
     return display;
@@ -1236,12 +1231,12 @@ ROT.Display.prototype.playIntro = function (map, i) {
     } else {
         if (typeof i === 'undefined') { i = map.getHeight(); }
         this.clear();
-        this.drawText(0, i - 2, "%c{#0f0}> initialize")
+        this.drawText(0, i - 2, "%c{#0f0}> initialize");
         this.drawText(15, i + 3, "U N T R U S T E D");
         this.drawText(20, i + 5, "- or - ");
         this.drawText(5, i + 7, "THE CONTINUING ADVENTURES OF DR. EVAL");
         this.drawText(3, i + 12, "a game by Alex Nisnevich and Greg Shuflin");
-        this.drawText(10, i + 22, "Press any key to begin ...")
+        this.drawText(10, i + 22, "Press any key to begin ...");
         setTimeout(function () {
             display.playIntro(map, i - 1);
         }, 100);
@@ -1409,7 +1404,7 @@ function DynamicObject(map, type, x, y, __game) {
                     }
                 }
 
-                if (__myTurn && __definition.behavior !== null) {
+                if (__myTurn && __definition.behavior) {
                     map._validateCallback(function () {
                         __definition.behavior(me, player);
                     });
@@ -3011,12 +3006,6 @@ Game.prototype.reference = {
         'type': 'method',
         'description': 'Sets the background color of the given square.'
     },
-    'map.setSquareColor': {
-        'name': 'map.setSquareColor(x, y, color)',
-        'category': 'map',
-        'type': 'method',
-        'description': 'Sets the background color of the given square.'
-    },
     'map.startTimer': {
         'name': 'map.startTimer(callback, delay)',
         'category': 'map',
@@ -3057,7 +3046,13 @@ Game.prototype.reference = {
         'name': 'map.validateNoTimers()',
         'category': 'map',
         'type': 'method',
-        'description': 'Raises an exception if there are any timers currently set with map.startLevel.'
+        'description': 'Raises an exception if there are any timers currently set with map.startTimer.'
+    },
+    'map.writeStatus': {
+        'name': 'map.writeStatus(message)',
+        'category': 'map',
+        'type': 'method',
+        'description': 'Displays a message at the bottom of the map.'
     },
 
     'object.behavior': {
@@ -4137,4 +4132,4 @@ $(document).bind('keydown keyup', function(e) {
 })();
 
 console.log("%cIf you can read this, you are cheating! D:", "color: red; font-size: x-large");
-console.log("%cBut really, you don't need this console to play the game. Walk around using arrow keys (or Vim keys), and pick up the computer (" + String.fromCharCode(0x2318) + "). Then the fun begins!", "font-size: 15px")
+console.log("%cBut really, you don't need this console to play the game. Walk around using arrow keys (or Vim keys), and pick up the computer (" + String.fromCharCode(0x2318) + "). Then the fun begins!", "font-size: 15px");

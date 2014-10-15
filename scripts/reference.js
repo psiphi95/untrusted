@@ -260,12 +260,6 @@ Game.prototype.reference = {
         'type': 'method',
         'description': 'Sets the background color of the given square.'
     },
-    'map.setSquareColor': {
-        'name': 'map.setSquareColor(x, y, color)',
-        'category': 'map',
-        'type': 'method',
-        'description': 'Sets the background color of the given square.'
-    },
     'map.startTimer': {
         'name': 'map.startTimer(callback, delay)',
         'category': 'map',
@@ -306,7 +300,13 @@ Game.prototype.reference = {
         'name': 'map.validateNoTimers()',
         'category': 'map',
         'type': 'method',
-        'description': 'Raises an exception if there are any timers currently set with map.startLevel.'
+        'description': 'Raises an exception if there are any timers currently set with map.startTimer.'
+    },
+    'map.writeStatus': {
+        'name': 'map.writeStatus(message)',
+        'category': 'map',
+        'type': 'method',
+        'description': 'Displays a message at the bottom of the map.'
     },
 
     'object.behavior': {
