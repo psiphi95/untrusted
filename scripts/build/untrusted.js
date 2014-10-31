@@ -152,6 +152,23 @@ function isNewerVersion(v1, v2) {
     }
     return (0 > cmp);
 }
+function playIntro(display, map, i) {
+	if (i < 0) {
+        display._intro = true;
+    } else {
+        if (typeof i === 'undefined') { i = map.getHeight(); }
+        display.clear();
+        display.drawText(0, i - 2, "%c{#0f0}> initialize");
+        display.drawText(15, i + 3, "U N T R U S T E D");
+        display.drawText(20, i + 5, "- or - ");
+        display.drawText(5, i + 7, "THE CONTINUING ADVENTURES OF DR. EVAL");
+        display.drawText(3, i + 12, "a game by Alex Nisnevich and Greg Shuflin");
+        display.drawText(10, i + 22, "Press any key to begin ...");
+        setTimeout(function () {
+            display.playIntro(map, i - 1);
+        }, 100);
+    }
+}
 (function () {
 function Game(debugMode, startLevel) {
     /* private properties */
@@ -168,35 +185,14 @@ function Game(debugMode, startLevel) {
     };
 
     this._levelFileNames = [
-        '01_cellBlockA.jsx',
-        '02_theLongWayOut.jsx',
-        '03_validationEngaged.jsx',
-        '04_multiplicity.jsx',
-        '05_minesweeper.jsx',
-        '06_drones101.jsx',
-        '07_colors.jsx',
-        '08_intoTheWoods.jsx',
-        '09_fordingTheRiver.jsx',
-        '10_ambush.jsx',
-        '11_robot.jsx',
-        '12_robotNav.jsx',
-        '13_robotMaze.jsx',
-        '14_crispsContest.jsx',
-        '15_exceptionalCrossing.jsx',
-        '16_lasers.jsx',
-        '17_pointers.jsx',
-        '18_superDrEvalBros.jsx',
-        '19_documentObjectMadness.jsx',
-        '20_bossFight.jsx',
-        '21_endOfTheLine.jsx',
-        '22_credits.jsx'
+'01_cellBlockA.jsx','02_theLongWayOut.jsx','03_validationEngaged.jsx','04_multiplicity.jsx','05_minesweeper.jsx','06_drones101.jsx','07_colors.jsx','08_intoTheWoods.jsx','09_fordingTheRiver.jsx','10_ambush.jsx','11_robot.jsx','12_robotNav.jsx','13_robotMaze.jsx','14_crispsContest.jsx','15_exceptionalCrossing.jsx','16_lasers.jsx','17_pointers.jsx','18_superDrEvalBros.jsx','19_documentObjectMadness.jsx','20_bossFight.jsx','21_endOfTheLine.jsx','22_credits.jsx'
     ];
 
     this._bonusLevels = [
-        // 'sampleLevel.jsx',
-        'pushme.jsx',
-        'trapped.jsx'
+'01_inTheDesert.jsx','02_theEmptyRoom.jsx','03_theCollapsingRoom.jsx','04_theGuard.jsx','pushme.jsx','sampleLevel.jsx','trapped.jsx'
     ]
+
+	this._mod = '';
 
     this._viewableScripts = [
         'codeEditor.js',
@@ -223,7 +219,7 @@ function Game(debugMode, startLevel) {
     this._resetTimeout = null;
     this._currentLevel = 0;
     this._currentFile = null;
-    this._levelReached = parseInt(localStorage.getItem('levelReached')) || 1;
+    this._levelReached = parseInt(localStorage.getItem(this._mod.length == 0 ? 'levelReached' : this._mod + '.levelReached')) || 1;
     this._displayedChapters = [];
 
     this._eval = window.eval; // store our own copy of eval so that we can override window.eval
@@ -233,6 +229,7 @@ function Game(debugMode, startLevel) {
 
     this._getHelpCommands = function () { return __commands; };
     this._isPlayerCodeRunning = function () { return __playerCodeRunning; };
+	this._getLocalKey = function (key) { return (this._mod.length == 0 ? '' : this._mod + '.') + key; };
 
     /* unexposed setters */
 
@@ -245,7 +242,7 @@ function Game(debugMode, startLevel) {
         // levelReached may be "81111" instead of "8" due to bug
         if (this._levelReached > this._levelFileNames.length) {
             for (var l = 1; l <= this._levelFileNames.length; l++) {
-                if (!localStorage["level" + l + ".lastGoodState"]) {
+                if (!localStorage[this._getLocalKey("level" + l + ".lastGoodState")]) {
                     this._levelReached = l - 1;
                     break;
                 }
@@ -288,8 +285,8 @@ function Game(debugMode, startLevel) {
         this.setUpNotepad();
 
         // Load help commands from local storage (if possible)
-        if (localStorage.getItem('helpCommands')) {
-            __commands = localStorage.getItem('helpCommands').split(';');
+        if (localStorage.getItem(this._getLocalKey('helpCommands'))) {
+            __commands = localStorage.getItem(this._getLocalKey('helpCommands')).split(';');
         }
 
         // Enable debug features
@@ -361,7 +358,7 @@ function Game(debugMode, startLevel) {
 
         this._levelReached = Math.max(levelNum, this._levelReached);
         if (!debugMode) {
-            localStorage.setItem('levelReached', this._levelReached);
+            localStorage.setItem(this._getLocalKey('levelReached'), this._levelReached);
         }
 
         var fileName = this._levelFileNames[levelNum - 1];
@@ -407,7 +404,7 @@ function Game(debugMode, startLevel) {
 
         // store the commands introduced in this level (for api reference)
         __commands = __commands.concat(editor.getProperties().commandsIntroduced).unique();
-        localStorage.setItem('helpCommands', __commands.join(';'));
+        localStorage.setItem(this._getLocalKey('helpCommands'), __commands.join(';'));
     };
 
     this._getLevelByPath = function (filePath) {
@@ -428,7 +425,7 @@ function Game(debugMode, startLevel) {
 
             // store the commands introduced in this level (for api reference)
             __commands = __commands.concat(editor.getProperties().commandsIntroduced).unique();
-            localStorage.setItem('helpCommands', __commands.join(';'));
+            localStorage.setItem(this._getLocalKey('helpCommands'), __commands.join(';'));
         }, 'text');
 
     };
@@ -1020,7 +1017,7 @@ function CodeEditor(textAreaDomID, width, height, game) {
 
     this.saveGoodState = function () {
         var lvlNum = game._currentFile ? game._currentFile : game._currentLevel;
-        localStorage.setItem('level' + lvlNum + '.lastGoodState', JSON.stringify({
+        localStorage.setItem(game._getLocalKey('level' + lvlNum + '.lastGoodState'), JSON.stringify({
             code: this.getCode(true),
             playerCode: this.getPlayerCode(),
             editableLines: editableLines,
@@ -1055,7 +1052,7 @@ function CodeEditor(textAreaDomID, width, height, game) {
     }
 
     this.getGoodState = function (lvlNum) {
-        return JSON.parse(localStorage.getItem('level' + lvlNum + '.lastGoodState'));
+        return JSON.parse(localStorage.getItem(game._getLocalKey('level' + lvlNum + '.lastGoodState')));
     }
 
     this.refresh = function () {
@@ -1225,22 +1222,7 @@ ROT.Display.prototype.saveGrid = function (map) {
 
 ROT.Display.prototype.playIntro = function (map, i) {
     display = this;
-
-    if (i < 0) {
-        this._intro = true;
-    } else {
-        if (typeof i === 'undefined') { i = map.getHeight(); }
-        this.clear();
-        this.drawText(0, i - 2, "%c{#0f0}> initialize");
-        this.drawText(15, i + 3, "U N T R U S T E D");
-        this.drawText(20, i + 5, "- or - ");
-        this.drawText(5, i + 7, "THE CONTINUING ADVENTURES OF DR. EVAL");
-        this.drawText(3, i + 12, "a game by Alex Nisnevich and Greg Shuflin");
-        this.drawText(10, i + 22, "Press any key to begin ...");
-        setTimeout(function () {
-            display.playIntro(map, i - 1);
-        }, 100);
-    }
+	playIntro(display, map, i)
 };
 
 ROT.Display.prototype.fadeIn = function (map, speed, callback, i) {
@@ -1349,6 +1331,8 @@ function DynamicObject(map, type, x, y, __game) {
     var __myTurn = true;
     var __timer = null;
 
+    this._map = map;
+
     /* wrapper */
 
     function wrapExposedMethod(f, object) {
@@ -1444,10 +1428,19 @@ function DynamicObject(map, type, x, y, __game) {
 
         // try to pick up items
         var objectName = map._getGrid()[__x][__y].type;
-        if (map._getObjectDefinition(objectName).type === 'item' && !__definition.projectile) {
+        var object = map._getObjectDefinition(objectName);
+        if (object.type === 'item' && !__definition.projectile) {
             __inventory.push(objectName);
             map._removeItemFromMap(__x, __y, objectName);
             map._playSound('pickup');
+        } else if (object.type === 'trap') {
+            // this part is used by janosgyerik's bonus levels
+            if (object.deactivatedBy && object.deactivatedBy.indexOf(__type) > -1) {
+                if (typeof(object.onDeactivate) === 'function') {
+                    object.onDeactivate();
+                }
+                map._removeItemFromMap(__x, __y, objectName);
+            }
         }
     };
 
@@ -2383,6 +2376,68 @@ Objects can have the following parameters:
     type: 'item' or null
 */
 
+// used by bonus levels 01 through 04
+function moveToward(obj, type) {
+    var target = obj.findNearest(type);
+    var leftDist = obj.getX() - target.x;
+    var upDist = obj.getY() - target.y;
+
+    var direction;
+    if (upDist == 0 && leftDist == 0) {
+        return;
+    }
+    if (upDist > 0 && upDist >= leftDist) {
+        direction = 'up';
+    } else if (upDist < 0 && upDist < leftDist) {
+        direction = 'down';
+    } else if (leftDist > 0 && leftDist >= upDist) {
+        direction = 'left';
+    } else {
+        direction = 'right';
+    }
+
+    if (obj.canMove(direction)) {
+        obj.move(direction);
+    }
+}
+
+// used by bonus levels 01 through 04
+function followAndKeepDistance(obj, type) {
+    var target = obj.findNearest(type);
+    var leftDist = obj.getX() - target.x;
+    var upDist = obj.getY() - target.y;
+
+    if (Math.abs(upDist) < 2 && Math.abs(leftDist) < 4
+        || Math.abs(leftDist) < 2 && Math.abs(upDist) < 4) {
+        return;
+    }
+    var direction;
+    if (upDist > 0 && upDist >= leftDist) {
+        direction = 'up';
+    } else if (upDist < 0 && upDist < leftDist) {
+        direction = 'down';
+    } else if (leftDist > 0 && leftDist >= upDist) {
+        direction = 'left';
+    } else {
+        direction = 'right';
+    }
+
+    if (obj.canMove(direction)) {
+        obj.move(direction);
+    }
+}
+
+// used by bonus levels 01 through 04
+function killPlayerIfTooFar(obj) {
+    var target = obj.findNearest('player');
+    var leftDist = obj.getX() - target.x;
+    var upDist = obj.getY() - target.y;
+
+    if (Math.abs(upDist) > 8 || Math.abs(leftDist) > 8) {
+        obj._map.getPlayer().killedBy('"suspicious circumstances"');
+    }
+}
+
 Game.prototype.getListOfObjects = function () {
     var game = this;
     return {
@@ -2528,6 +2583,33 @@ Game.prototype.getListOfObjects = function () {
             'onDrop': function () {
                 game.map.writeStatus('You have lost the Algorithm!');
             }
+        },
+
+        // used by bonus levels 01 through 04
+        'eye': {
+            'type': 'dynamic',
+            'symbol': 'E',
+            'color': 'red',
+            'behavior': function (me) {
+                followAndKeepDistance(me, 'player');
+                killPlayerIfTooFar(me);
+            },
+            'onCollision': function (player) {
+                player.killedBy('"the eye"');
+            },
+        },
+
+        // used by bonus levels 01 through 04
+        'guard': {
+            'type': 'dynamic',
+            'symbol': 'd',
+            'color': 'red',
+            'behavior': function (me) {
+                moveToward(me, 'player');
+            },
+            'onCollision': function (player) {
+                player.killedBy('a guard drone');
+            },
         }
     };
 };
@@ -3923,7 +4005,7 @@ Game.prototype.setUpNotepad = function () {
     this.notepadEditor.setSize(null, 275);
 
     var ls_tag = 'notepadContent';
-    var content = localStorage.getItem(ls_tag);
+    var content = localStorage.getItem(this._getLocalKey(ls_tag));
     if (content === null) {
         content = '';
     }
@@ -3935,7 +4017,7 @@ Game.prototype.setUpNotepad = function () {
 
     $('#notepadSaveButton').click(function () {
         var v = game.notepadEditor.getValue();
-        localStorage.setItem(ls_tag, v);
+        localStorage.setItem(this._getLocalKey(ls_tag), v);
     });
 };
 

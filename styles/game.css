@@ -27,6 +27,7 @@ body {
 	color: transparent;
 	float: left;
 	clear: left;
+	position: relative;
 }
 
 #screen canvas {
