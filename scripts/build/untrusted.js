@@ -189,7 +189,7 @@ function Game(debugMode, startLevel) {
     ];
 
     this._bonusLevels = [
-'01_inTheDesert.jsx','02_theEmptyRoom.jsx','03_theCollapsingRoom.jsx','04_theGuard.jsx','_sampleLevel.jsx','ice.jsx','levelName.jsx','pushme.jsx','threeKeys.jsx','trapped.jsx'
+'01_inTheDesert.jsx','02_theEmptyRoom.jsx','03_theCollapsingRoom.jsx','04_theGuard.jsx','_sampleLevel.jsx','ice.jsx','levelName.jsx','pushme.jsx','threeKeys.jsx','trapped.jsx','wallsWithEyes.jsx'
     ].filter(function (lvl) { return (lvl.indexOf('_') != 0); }); // filter out bonus levels that start with '_'
 
 	this._mod = '';
@@ -2509,9 +2509,13 @@ Game.prototype.getListOfObjects = function () {
             'color': '#f0f',
             'onCollision': function (player, me) {
                 if (!player._hasTeleported) {
-                    game._callUnexposedMethod(function () {
-                        player._moveTo(me.target);
-                    });
+                    if (me.target) {
+                        game._callUnexposedMethod(function () {
+                            player._moveTo(me.target);
+                        });
+                    } else {
+                        throw 'TeleporterError: Missing target for teleporter'
+                    }
                 }
                 player._hasTeleported = true;
             },
