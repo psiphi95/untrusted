@@ -90,6 +90,23 @@ if( me.canMove('down') ) {
 }
 ```
 
+##psiphi95
+All vertical drones can be forced to move any horizontal direction
+then add some blocks several spaces ahead to stop them
+Attack
+```javascript
+   me.move('right');
+   moveToward(me, 'player');
+```
+Defend
+```javascript
+   me.move('right');
+   moveToward(me, 'block');
+   map.placeObject(29, 11, 'block');
+   map.placeObject(29, 13, 'block');
+   map.placeObject(35, 12, 'block');
+```
+
 ## pk
 all three drone types random moves toward ceil or right:
 ```
