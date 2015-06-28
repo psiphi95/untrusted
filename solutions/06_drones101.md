@@ -41,6 +41,26 @@ map.createFromGrid([
     }, 38, 8);
 ```
 
+#Drone Creation
+##psiphi95: Creates allied drones that swarms the enemy & traps it in a permanent cage
+```javascript
+   map.defineObject('crusher', {
+        'type': 'dynamic',
+        'symbol': '*',
+        'color': 'green',
+        'onCollision': function (attackDrone) {
+            'attackDrone'.killedBy('a crusher');
+        },
+        'behavior': function (attackDrone) {
+            moveToward(attackDrone, 'attackDrone');
+        }
+   });
+   for (var i=16; i<map.getWidth()-31; i++) {
+   map.placeObject(map.getWidth()-21+i, map.getHeight()-11, 'crusher');
+   map.placeObject(map.getWidth()-21+i, map.getHeight()-15, 'crusher');
+   }        
+```
+
 # Function Override
 ## esolitos
 
