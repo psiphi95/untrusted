@@ -93,12 +93,12 @@ if( me.canMove('down') ) {
 ##psiphi95
 All vertical drones can be forced to move any horizontal direction
 then add some blocks several spaces ahead to stop them
-Attack
+###Attack
 ```javascript
    me.move('right');
    moveToward(me, 'player');
 ```
-Defend
+###Defend
 ```javascript
    me.move('right');
    moveToward(me, 'block');
